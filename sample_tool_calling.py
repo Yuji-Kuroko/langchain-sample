@@ -14,6 +14,7 @@
 
 import logging
 import os
+import sys
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.tools import Tool
@@ -43,7 +44,7 @@ weather_tool = Tool(
 # システムプロンプトのような内容をテンプレートに含める
 prompt_template = PromptTemplate(
     input_variables=["input"],
-    template="あなたは天気予報のエキスパートです。入力に基づいて、天気情報を正確に提供してください。\n{input}"
+    template="あなたは天気予報のエキスパートです。入力に基づいて、天気情報を正確に提供してください。日本語で回答をしてください。\n{input}"
 )
 
 # LLMの初期化
@@ -59,7 +60,8 @@ agent = initialize_agent(
 )
 
 # プロンプトの設定
-prompt = "2024年10月10日〜13日の東京都の天気を教えてください。"
+prompt = sys.argv[1] if len(sys.argv) > 1 else "2024年10月10日〜13日の東京都の天気を教えてください。"
+
 
 # エージェントの実行とログの出力
 if __name__ == "__main__":
