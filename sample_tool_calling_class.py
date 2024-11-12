@@ -6,13 +6,14 @@ import logging
 import sys
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langchain.tools import Tool
-from langchain.agents import initialize_agent, AgentType
-from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 
 class SampleAgent:
+    def __init__(self):
+        # tool callingでインスタンス変数を呼び出せるか
+        self.variant = "sample test"
+
     def run(self, prompt):
         # Agentnoの初期化
         load_dotenv()
@@ -26,7 +27,7 @@ class SampleAgent:
         # LLMの初期化
         llm = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=openai_api_key)
 
-        tools = [self.user_join_org]
+        tools = [self.wrapped_user_join_org()]
         agent = create_react_agent(llm, tools, state_modifier=system_prompt, debug=True)
 
         # ログの設定
@@ -40,16 +41,19 @@ class SampleAgent:
         except Exception as e:
             logger.error("エージェントの実行中にエラーが発生しました: %s", str(e))
 
-    @tool(parse_docstring=True)
-    def user_join_org(org_name: str, user_name: str) -> str:
-        """指定したユーザーを指定したorganizationにjoinさせます
+    def wrapped_user_join_org(self):
+        @tool(parse_docstring=True)
+        def user_join_org(org_name: str, user_name: str) -> str:
+            """指定したユーザーを指定したorganizationにjoinさせます
 
-        Args:
-            org_name: organization name
-            user_name: user name
-        """
-        # TODO: 実装
-        return "OK"
+            Args:
+                org_name: organization name
+                user_name: user name
+            """
+            # TODO: 実装
+            print(self.variant)
+            return "OK"
+        return user_join_org
 
 
 if __name__ == "__main__":
